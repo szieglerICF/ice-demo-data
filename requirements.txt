@@ -1,0 +1,5 @@
+html-testRunner
+coverage
+faker
+pandas
+indic_transliteration

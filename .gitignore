@@ -169,3 +169,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+ice-demo-data.code-workspace
+reports/**/**
+.DS_Store
+*.txt
+*.csv
+*.jpg
+*.jpeg
+*.json
+!requirements.txt
+!report_template_json.txt
