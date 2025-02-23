@@ -3,3 +3,4 @@ coverage
 faker
 pandas
 indic_transliteration
+icecream
