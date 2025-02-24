@@ -1,10 +1,11 @@
 import csv
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import pandas as pd
+from dateutil import parser
 from faker import Faker
 from icecream import ic
 from indic_transliteration import sanscript
@@ -295,10 +296,10 @@ indian_names = {
 fake_records = []
 
 
-def create_indian_name():
+def create_indian_name(gender):
     first_name = random.choice(
         indian_names["male_first_names"]
-        if fake.random_element(["male", "female"]) == "male"
+        if gender == "M"
         else indian_names["female_first_names"]
     )
     last_name = random.choice(indian_names["last_names"])
@@ -314,56 +315,266 @@ def create_indian_name():
     return first_name, last_name
 
 
-def create_name(faker_locale):
+def create_name(faker_locale, gender):
     fake = Faker(faker_locale)
     fake_us = Faker("en_US")
     first_name = fake.first_name()
+    if gender == "M":
+        first_name = fake.first_name_male()
+    else:
+        first_name = fake.first_name_female()
+
     if faker_locale == "es_MX" and random.random() < 0.15:
         last_name = f"{fake.last_name()} {fake.last_name()}"
     else:
         last_name = fake.last_name()
 
     if faker_locale == "hi_IN":
-        first_name, last_name = create_indian_name()
+        first_name, last_name = create_indian_name(gender)
     if faker_locale == "en_US":
         first_name = fake_us.first_name()
         last_name = fake_us.last_name()
     return first_name, last_name
 
 
-
 # def funtion to take street and introduce up to n leveinstein distance errors and any given string
 def introduce_spelling_errors(text, n):
+    if len(str(text)) <= 3:
+        return text
 
-    
+    ic(text)
+
     # Introduce up to n Levenshtein distance errors
     j = random.randint(0, len(text) - 1)
-    ic(j)
-    
+
     # Use equal random chance to make one of the errors
     error_type = random.choice([1, 2, 3, 4, 5])
-    ic(error_type)
     if error_type == 1:
         # Insert character
-        char_to_insert = random.choice('abcdefghijklmnopqrstuvwxyz')
+        char_to_insert = random.choice("abcdefghijklmnopqrstuvwxyz")
         text = text[:j] + char_to_insert + text[j:]
     elif error_type == 2:
         # Delete character
-        text = text[:j] + text[j+1:]
+        text = text[:j] + text[j + 1 :]
     elif error_type == 3:
         # Substitute character
-        char_to_substitute = random.choice('abcdefghijklmnopqrstuvwxyz')
-        text = text[:j] + char_to_substitute + text[j+1:]
+        char_to_substitute = random.choice("abcdefghijklmnopqrstuvwxyz")
+        text = text[:j] + char_to_substitute + text[j + 1 :]
     elif error_type == 4:
         # Transpose character
         if j < len(text) - 1:
-            text = text[:j] + text[j+1] + text[j] + text[j+2:]
+            text = text[:j] + text[j + 1] + text[j] + text[j + 2 :]
     elif error_type == 5:
         # Change case
-        text = text[:j] + text[j].swapcase() + text[j+1:]
-    
+        text = text[:j] + text[j].swapcase() + text[j + 1 :]
+
     return text
-                
+
+
+def clear_out_random_fields(record):
+    changeable_fields = [
+        "Date of Birth",
+        "Country of Origin",
+        "Gender",
+        "Height (feet)",
+        "Height (inches)",
+        "Weight",
+        "Last Known Address",
+        "Latitude",
+        "Longitude",
+        "Immigration Status",
+        "Visa Type",
+        "Visa Expiration Date",
+        "Known Border Crossing(s)",
+        "Past Deportations",
+        "Current Location",
+        "Risk Level",
+        "Alias",
+        "Phone Number",
+        "Known Associates",
+        "Organized Crime Links",
+        "Case Officer Assigned",
+        "Investigation Status",
+        "Legal Proceedings",
+        "Deportation Orders",
+    ]
+    count_of_fields_changed = random.randint(3, 7)
+    fields_changed = random.sample(changeable_fields, count_of_fields_changed)
+    for field in fields_changed:
+        ic(f"Clearing out {field}")
+        record[field] = ""
+    return record
+
+
+def all_caps_random_fields(record):
+    changeable_fields = [
+        "First Name",
+        "Last Name",
+        "Date of Birth",
+        "Country of Origin",
+        "Gender",
+        "Height (feet)",
+        "Height (inches)",
+        "Weight",
+        "Last Known Address",
+        "Latitude",
+        "Longitude",
+        "Immigration Status",
+        "Visa Type",
+        "Visa Expiration Date",
+        "Known Border Crossing(s)",
+        "Past Deportations",
+        "Current Location",
+        "Risk Level",
+        "Alias",
+        "Phone Number",
+        "Known Associates",
+        "Organized Crime Links",
+        "Case Officer Assigned",
+        "Investigation Status",
+        "Legal Proceedings",
+        "Deportation Orders",
+    ]
+    count_of_fields_changed = random.randint(3, 7)
+    fields_changed = random.sample(changeable_fields, count_of_fields_changed)
+    for field in fields_changed:
+        # if string, capitalize
+        if isinstance(record[field], str):
+            ic(f"Capitalizing {field}")
+            record[field] = record[field].upper()
+    return record
+
+
+def misspell_random_fields(record):
+    changeable_fields = [
+        "Date of Birth",
+        "Country of Origin",
+        "Gender",
+        "Height (feet)",
+        "Height (inches)",
+        "Weight",
+        "Last Known Address",
+        "Latitude",
+        "Longitude",
+        "Immigration Status",
+        "Visa Type",
+        "Visa Expiration Date",
+        "Known Border Crossing(s)",
+        "Past Deportations",
+        "Current Location",
+        "Risk Level",
+        "Alias",
+        "Phone Number",
+        "Known Associates",
+        "Organized Crime Links",
+        "Case Officer Assigned",
+        "Investigation Status",
+        "Legal Proceedings",
+        "Deportation Orders",
+    ]
+    count_of_fields_changed = random.randint(3, 7)
+    fields_changed = random.sample(changeable_fields, count_of_fields_changed)
+    for field in fields_changed:
+        ic(field)
+        ic(record[field])
+        # if the field is text, not a number, introduce spelling errors
+        if isinstance(record[field], str):
+            record[field] = introduce_spelling_errors(record[field], 1)
+    return record
+
+
+def has_accented_chars(text):
+    accented_chars = ["á", "é", "í", "ó", "ú", "ñ", "ü"]
+    for char in accented_chars:
+        if char in text:
+            return True
+    return False
+
+
+# replace all chars with accented marks to the American English char
+def replace_accented_chars(text):
+    text = text.replace("á", "a")
+    text = text.replace("é", "e")
+    text = text.replace("í", "i")
+    text = text.replace("ó", "o")
+    text = text.replace("ú", "u")
+    text = text.replace("ñ", "n")
+    text = text.replace("ü", "u")
+    return text
+
+
+def add_duplicate_record(
+    base_record, faker_locale, gender, duplicate_lead_id, duplicate_lead_source
+):
+    dupe = base_record.copy()
+
+    possible_changes = ["name change", "birthday change", "address change"]
+    dupe_reason = random.choice(possible_changes)
+
+    if dupe_reason == "name change":
+        name_change_options = [
+            "change first name",
+            "change last name",
+            "flip names",
+            "misspelling",
+        ]
+
+        name_change_option = random.choice(name_change_options)
+
+        if name_change_option == "change first name":
+            first_name, last_name = create_name(faker_locale, gender)
+            dupe["First Name"] = first_name
+        if name_change_option == "change last name":
+            first_name, last_name = create_name(faker_locale, gender)
+            dupe["Last Name"] = last_name
+        if name_change_option == "flip names":
+            dupe["First Name"], dupe["Last Name"] = (
+                base_record["Last Name"],
+                base_record["First Name"],
+            )
+        if name_change_option == "misspelling":
+            if random.random() < 0.50:
+                dupe["First Name"] = introduce_spelling_errors(
+                    base_record["First Name"], 1
+                )
+            else:
+                dupe["Last Name"] = introduce_spelling_errors(
+                    base_record["Last Name"], 1
+                )
+
+        dupe_reason += " - " + name_change_option
+
+    if dupe_reason == "birthday change":
+        birthday = parser.parse(base_record["Date of Birth"])
+        delta = random.choice([-1, 1])
+        new_birthday = birthday + timedelta(days=delta)
+        dupe["Date of Birth"] = new_birthday.strftime("%Y-%m-%d")
+
+    if dupe_reason == "address change":
+        new_address = (
+            fake_us.street_address()
+            + ", "
+            + fake_us.city()
+            + ", "
+            + fake_us.state()
+            + " "
+            + fake_us.zipcode()
+        )
+        dupe["Last Known Address"] = new_address
+
+    dupe["Lead ID"] = duplicate_lead_id
+    dupe["Lead Source"] = duplicate_lead_source
+    dupe["IsDupe"] = True
+    dupe["Dupe Reason"] = dupe_reason
+
+    dupe = clear_out_random_fields(dupe)
+    dupe = misspell_random_fields(dupe)
+    dupe = all_caps_random_fields(dupe)
+    dupe["First Name"] = replace_accented_chars(dupe["First Name"])
+    dupe["Last Name"] = replace_accented_chars(dupe["Last Name"])
+
+    return dupe
+
 
 for country, details in config_data.items():
     faker_locale = details["faker_locale"]
@@ -378,6 +589,7 @@ for country, details in config_data.items():
         duplicate_lead_id = uuid4().hex[0:16]
 
         gender = fake.random_element(["M", "F"])
+        first_name, last_name = create_name(faker_locale, gender)
         height_feet = random.randint(4, 6)
         height_inches = random.randint(0, 11) + 1
         weight = random.randint(100, 250)
@@ -413,7 +625,7 @@ for country, details in config_data.items():
                 ]
             )
         fingerprint_hash = uuid4().hex[0:10]
-        first_name, last_name = create_name(faker_locale)
+
         country_of_origin = country
         last_known_address = random.choice(destinations)
         city = last_known_address["city"]
@@ -487,7 +699,8 @@ for country, details in config_data.items():
         # 5% of time show alias
         alias = ""
         if random.random() < 0.05:
-            alias = create_name(faker_locale)
+            alias_first, alias_last = create_name(faker_locale, gender)
+            alias = f"{alias_first} {alias_last}"
 
         phone_number = fake.phone_number()
         # change area code based on country
@@ -508,14 +721,18 @@ for country, details in config_data.items():
         # 10% of time show family assoicate
         family_associate = ""
         if random.random() < 0.1:
-            family_associate_first, family_associate_last = create_name(faker_locale)
+            family_associate_first, family_associate_last = create_name(
+                faker_locale, gender
+            )
             family_associate = (
                 f"{family_associate_first} {family_associate_last} (Family)"
             )
         # 5% of time show known accomplice
         known_accomplice = ""
         if random.random() < 0.05:
-            known_accomplice_first, known_accomplice_last = create_name(faker_locale)
+            known_accomplice_first, known_accomplice_last = create_name(
+                faker_locale, gender
+            )
             known_accomplice = (
                 f"{known_accomplice_first} {known_accomplice_last} (Accomplice)"
             )
@@ -538,12 +755,12 @@ for country, details in config_data.items():
         # 65% of time show case officer assigned
         case_officer_assigned = ""
         if random.random() < 0.65:
-            first, last = create_name("en_US")
+            first, last = create_name("en_US", gender)
             case_officer_assigned = (
                 f"{last}, {first} (Badge # {fake.random_int(min=1000, max=9999)})"
             )
         if random.random() < 0.45:
-            first, last = create_name("en_US")
+            first, last = create_name("en_US", random.choice(["M", "F"]))
             duplicate_case_officer_assigned = (
                 f"{first} {last} (Badge # {fake.random_int(min=1000, max=9999)})"
             )
@@ -618,142 +835,53 @@ for country, details in config_data.items():
 
         dedupe_id = lead_id
 
-        base_record ={
-                "Lead ID": lead_id,
-                "Lead Source": lead_source,
-                "First Name": first_name,
-                "Last Name": last_name,
-                "Date of Birth": dob,
-                "Country of Origin": country_of_origin,
-                "Gender": gender,
-                "Height (feet)": height_feet,
-                "Height (inches)": height_inches,
-                "Weight": weight,
-                "Distinguishing Marks": distinquishing_marks,
-                "Fingerprint Hash": fingerprint_hash,
-                "Last Known Address": full_address,
-                "Latitude": latitude,
-                "Longitude": longitude,
-                "Immigration Status": immigration_status,
-                "Visa Type": visa_type,
-                "Visa Expiration Date": visa_expiration_date,
-                "Known Border Crossing(s)": known_border_crossings_single,
-                "Past Deportations": past_deportation,
-                "Current Location": current_location,
-                "Risk Level": risk_level,
-                "Alias": alias,
-                "Phone Number": phone_number,
-                "Known Associates": known_associates,
-                "Organized Crime Links": organized_crime_links,
-                "Case Officer Assigned": case_officer_assigned,
-                "Investigation Status": investigation_status,
-                "Legal Proceedings": legal_proceedings,
-                "Deportation Orders": deportation_order,
-                "Dedupe ID": dedupe_id,
-                "IsDupe": False,
-                "Dupe Reason": "",
-            }
+        base_record = {
+            "Dedupe ID": dedupe_id,
+            "IsDupe": False,
+            "Dupe Reason": "",
+            "Lead ID": lead_id,
+            "Lead Source": lead_source,
+            "First Name": first_name,
+            "Last Name": last_name,
+            "Date of Birth": dob,
+            "Country of Origin": country_of_origin,
+            "Gender": gender,
+            "Height (feet)": height_feet,
+            "Height (inches)": height_inches,
+            "Weight": weight,
+            "Distinguishing Marks": distinquishing_marks,
+            "Fingerprint Hash": fingerprint_hash,
+            "Last Known Address": full_address,
+            "Latitude": latitude,
+            "Longitude": longitude,
+            "Immigration Status": immigration_status,
+            "Visa Type": visa_type,
+            "Visa Expiration Date": visa_expiration_date,
+            "Known Border Crossing(s)": known_border_crossings_single,
+            "Past Deportations": past_deportation,
+            "Current Location": current_location,
+            "Risk Level": risk_level,
+            "Alias": alias,
+            "Phone Number": phone_number,
+            "Known Associates": known_associates,
+            "Organized Crime Links": organized_crime_links,
+            "Case Officer Assigned": case_officer_assigned,
+            "Investigation Status": investigation_status,
+            "Legal Proceedings": legal_proceedings,
+            "Deportation Orders": deportation_order,
+        }
         fake_records.append(base_record)
 
-        # # Introduce dirty data
-        # for record in fake_records:
-        #     if random.random() < 0.01:
-        #         field_to_nullify = random.choice(
-        #             ["First Name", "Last Name", "Last Known Address"]
-        #         )
-        #         record[field_to_nullify] = None
-
-
         # Add duplicate records
-        # 10% of time
-        if random.random() < 0.10:
-
-            changeable_fields = [
-                "Lead Source",
-                "First Name",
-                "Last Name",
-                "Date of Birth"
-                "Country of Origin",
-                "Gender",
-                "Height (feet)",
-                "Height (inches)",
-                "Weight",
-                "Last Known Address",
-                "Latitude",
-                "Longitude",
-                "Immigration Status",
-                "Visa Type",
-                "Visa Expiration Date",
-                "Known Border Crossing(s)",
-                "Past Deportations",
-                "Current Location",
-                "Risk Level",
-                "Alias",
-                "Phone Number",
-                "Known Associates",
-                "Organized Crime Links",
-                "Case Officer Assigned",
-                "Investigation Status",
-                "Legal Proceedings",
-                "Deportation Orders",
-            ]
-
-            # truely copy base record to duplicate record
-            dupe = base_record.copy()
-
-            possible_changes = ["name change"]
-            # pick random possible change
-            dupe_reason = random.choice(possible_changes)
-
-            # 25% of time adjust name
-            if dupe_reason == "name change":
-                # equally probable changes to first name, last name, or both:
-                # change first name
-                # flip names
-                # remove multiple last name
-                # 1 char spelling error (levenstein distance)
-                # 1 char spelling error (soundex)
-
-                name_change_options = [
-                    "change first name", "change last name",
-                    "flip names",
-                    "misspelling",
-                ]
-
-                name_change_option = random.choice(name_change_options)
-
-                if name_change_option == "change first name":
-                    first_name, last_name = create_name(faker_locale)
-                    dupe["First Name"] = first_name
-                if name_change_option == "change last name":
-                    first_name, last_name = create_name(faker_locale)
-                    dupe["Last Name"] = last_name
-                if name_change_option == "flip names":
-                    dupe["First Name"], dupe["Last Name"] = base_record["Last Name"], base_record["First Name"]
-                if name_change_option == "misspelling":
-                    # 50% of time change first name, other 50% last
-                    if random.random() < 0.50:
-                        dupe["First Name"] = introduce_spelling_errors(base_record["First Name"], 1)
-                    else:
-                        dupe["Last Name"] = introduce_spelling_errors(base_record["Last Name"], 1)
-                dupe_reason += " " + name_change_option
-            dupe["Lead ID"] = duplicate_lead_id
-            dupe["Lead Source"] = duplicate_lead_source
-            dupe["IsDupe"] = True
-            dupe["Dupe Reason"] = dupe_reason
-
-            ic(dupe)
-
-            fake_records.append(dupe)  
-
-
-
-
-
-
-
-
-
+        if random.random() < 0.15:
+            dupe = add_duplicate_record(
+                base_record,
+                faker_locale,
+                gender,
+                duplicate_lead_id,
+                duplicate_lead_source,
+            )
+            fake_records.append(dupe)
 
 
 # Convert to DataFrame
@@ -761,6 +889,6 @@ df = pd.DataFrame(fake_records)
 
 # Save to CSV
 csv_filename = "fake_immigrant_records.csv"
-df.to_csv(csv_filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
+df.to_csv(csv_filename, index=False, encoding="windows-1252", quoting=csv.QUOTE_ALL)
 
 print(f"Fake immigrant records have been saved to {csv_filename}")
