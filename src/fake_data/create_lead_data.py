@@ -12,11 +12,16 @@ from indic_transliteration import sanscript
 from indic_transliteration.sanscript import transliterate
 
 # Configuration data
+mexico_count = 5000
+el_salvador_count = int(mexico_count * 0.6)
+guatemala_count = int(mexico_count * 0.4)
+honduras_count = int(mexico_count * 0.5)
+india_count = int(mexico_count * 0.1)
 config_data = {
     "Mexico": {
         "country_code": "MX",
         "faker_locale": "es_MX",
-        "count": 10,
+        "count": mexico_count,
         "destinations": [
             {
                 "city": "Los Angeles",
@@ -53,7 +58,7 @@ config_data = {
     "El Salvador": {
         "country_code": "SV",
         "faker_locale": "es_MX",
-        "count": 10,
+        "count": el_salvador_count,
         "destinations": [
             {
                 "city": "Los Angeles",
@@ -90,7 +95,7 @@ config_data = {
     "Guatemala": {
         "country_code": "GT",
         "faker_locale": "es_MX",
-        "count": 10,
+        "count": guatemala_count,
         "destinations": [
             {
                 "city": "Los Angeles",
@@ -127,7 +132,7 @@ config_data = {
     "Honduras": {
         "country_code": "HN",
         "faker_locale": "es_MX",
-        "count": 10,
+        "count": honduras_count,
         "destinations": [
             {
                 "city": "Houston",
@@ -164,7 +169,7 @@ config_data = {
     "India": {
         "country_code": "IN",
         "faker_locale": "hi_IN",
-        "count": 10,
+        "count": india_count,
         "destinations": [
             {
                 "city": "New York City",
@@ -342,8 +347,6 @@ def introduce_spelling_errors(text, n):
     if len(str(text)) <= 3:
         return text
 
-    ic(text)
-
     # Introduce up to n Levenshtein distance errors
     j = random.randint(0, len(text) - 1)
 
@@ -401,7 +404,6 @@ def clear_out_random_fields(record):
     count_of_fields_changed = random.randint(3, 7)
     fields_changed = random.sample(changeable_fields, count_of_fields_changed)
     for field in fields_changed:
-        ic(f"Clearing out {field}")
         record[field] = ""
     return record
 
@@ -440,7 +442,6 @@ def all_caps_random_fields(record):
     for field in fields_changed:
         # if string, capitalize
         if isinstance(record[field], str):
-            ic(f"Capitalizing {field}")
             record[field] = record[field].upper()
     return record
 
@@ -475,8 +476,6 @@ def misspell_random_fields(record):
     count_of_fields_changed = random.randint(3, 7)
     fields_changed = random.sample(changeable_fields, count_of_fields_changed)
     for field in fields_changed:
-        ic(field)
-        ic(record[field])
         # if the field is text, not a number, introduce spelling errors
         if isinstance(record[field], str):
             record[field] = introduce_spelling_errors(record[field], 1)
@@ -577,6 +576,7 @@ def add_duplicate_record(
 
 
 for country, details in config_data.items():
+    print(country)
     faker_locale = details["faker_locale"]
     count = details["count"]
     destinations = details["destinations"]
@@ -887,8 +887,18 @@ for country, details in config_data.items():
 # Convert to DataFrame
 df = pd.DataFrame(fake_records)
 
-# Save to CSV
-csv_filename = "fake_immigrant_records.csv"
+# Save the training version with duplicate training fields
+csv_filename = "fake_immigrant_records_training.csv"
 df.to_csv(csv_filename, index=False, encoding="windows-1252", quoting=csv.QUOTE_ALL)
+
+
+# shuffle the records
+df = df.sample(frac=1).reset_index(drop=True)
+# remove these columns: Dedupe ID, IsDupe, Dupe Reason, 
+df = df.drop(columns=["Dedupe ID", "IsDupe", "Dupe Reason"])
+# Save the testing version without duplicate training fields
+csv_filename = "fake_immigrate_records_testing.csv"
+df.to_csv(csv_filename, index=False, encoding="windows-1252", quoting=csv.QUOTE_ALL)
+
 
 print(f"Fake immigrant records have been saved to {csv_filename}")

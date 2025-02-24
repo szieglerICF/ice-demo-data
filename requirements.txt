@@ -4,3 +4,5 @@ faker
 pandas
 indic_transliteration
 icecream
+sklearn
+numpy
