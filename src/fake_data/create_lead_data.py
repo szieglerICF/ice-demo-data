@@ -12,7 +12,8 @@ from indic_transliteration import sanscript
 from indic_transliteration.sanscript import transliterate
 
 # Configuration data
-mexico_count = 5000
+PERCENT_DUPES = .15
+mexico_count = 100
 el_salvador_count = int(mexico_count * 0.6)
 guatemala_count = int(mexico_count * 0.4)
 honduras_count = int(mexico_count * 0.5)
@@ -376,30 +377,29 @@ def introduce_spelling_errors(text, n):
 
 def clear_out_random_fields(record):
     changeable_fields = [
-        "Date of Birth",
-        "Country of Origin",
-        "Gender",
-        "Height (feet)",
-        "Height (inches)",
-        "Weight",
-        "Last Known Address",
-        "Latitude",
-        "Longitude",
-        "Immigration Status",
-        "Visa Type",
-        "Visa Expiration Date",
-        "Known Border Crossing(s)",
-        "Past Deportations",
-        "Current Location",
-        "Risk Level",
-        "Alias",
-        "Phone Number",
-        "Known Associates",
-        "Organized Crime Links",
-        "Case Officer Assigned",
-        "Investigation Status",
-        "Legal Proceedings",
-        "Deportation Orders",
+        "date_of_birth",
+        "country_of_origin",
+        "anumber",
+        "gender",
+        "height_inches",
+        "weight",
+        "last_known_address",
+        "latitude",
+        "longitude",
+        "immigration_status",
+        "visa_type",
+        "visa_expiration_date",
+        "known_border_crossings",
+        "past_deportations",
+        "current_location",
+        "alias",
+        "phone_number",
+        "known_associates",
+        "organized_crime_links",
+        "case_officer_assigned",
+        "investigation_status",
+        "legal_proceedings",
+        "deportation_orders",
     ]
     count_of_fields_changed = random.randint(3, 7)
     fields_changed = random.sample(changeable_fields, count_of_fields_changed)
@@ -410,32 +410,30 @@ def clear_out_random_fields(record):
 
 def all_caps_random_fields(record):
     changeable_fields = [
-        "First Name",
-        "Last Name",
-        "Date of Birth",
-        "Country of Origin",
-        "Gender",
-        "Height (feet)",
-        "Height (inches)",
-        "Weight",
-        "Last Known Address",
-        "Latitude",
-        "Longitude",
-        "Immigration Status",
-        "Visa Type",
-        "Visa Expiration Date",
-        "Known Border Crossing(s)",
-        "Past Deportations",
-        "Current Location",
-        "Risk Level",
-        "Alias",
-        "Phone Number",
-        "Known Associates",
-        "Organized Crime Links",
-        "Case Officer Assigned",
-        "Investigation Status",
-        "Legal Proceedings",
-        "Deportation Orders",
+        "first_name",
+        "last_name",
+        "date_of_birth",
+        "anumber",
+        "gender",
+        "height_inches",
+        "weight",
+        "last_known_address",
+        "latitude",
+        "longitude",
+        "immigration_status",
+        "visa_type",
+        "visa_expiration_date",
+        "known_border_crossings",
+        "past_deportations",
+        "current_location",
+        "alias",
+        "phone_number",
+        "known_associates",
+        "organized_crime_links",
+        "case_officer_assigned",
+        "investigation_status",
+        "legal_proceedings",
+        "deportation_orders",
     ]
     count_of_fields_changed = random.randint(3, 7)
     fields_changed = random.sample(changeable_fields, count_of_fields_changed)
@@ -448,30 +446,26 @@ def all_caps_random_fields(record):
 
 def misspell_random_fields(record):
     changeable_fields = [
-        "Date of Birth",
-        "Country of Origin",
-        "Gender",
-        "Height (feet)",
-        "Height (inches)",
-        "Weight",
-        "Last Known Address",
-        "Latitude",
-        "Longitude",
-        "Immigration Status",
-        "Visa Type",
-        "Visa Expiration Date",
-        "Known Border Crossing(s)",
-        "Past Deportations",
-        "Current Location",
-        "Risk Level",
-        "Alias",
-        "Phone Number",
-        "Known Associates",
-        "Organized Crime Links",
-        "Case Officer Assigned",
-        "Investigation Status",
-        "Legal Proceedings",
-        "Deportation Orders",
+        "gender",
+        "height_inches",
+        "weight",
+        "last_known_address",
+        "latitude",
+        "longitude",
+        "immigration_status",
+        "visa_type",
+        "visa_expiration_date",
+        "known_border_crossings",
+        "past_deportations",
+        "current_location",
+        "alias",
+        "phone_number",
+        "known_associates",
+        "organized_crime_links",
+        "case_officer_assigned",
+        "investigation_status",
+        "legal_proceedings",
+        "deportation_orders",
     ]
     count_of_fields_changed = random.randint(3, 7)
     fields_changed = random.sample(changeable_fields, count_of_fields_changed)
@@ -507,7 +501,12 @@ def add_duplicate_record(
 ):
     dupe = base_record.copy()
 
-    possible_changes = ["name change", "birthday change", "address change"]
+    possible_changes = [
+        "name change",
+        "birthday change",
+        "address change",
+        "anumber change",
+    ]
     dupe_reason = random.choice(possible_changes)
 
     if dupe_reason == "name change":
@@ -522,32 +521,32 @@ def add_duplicate_record(
 
         if name_change_option == "change first name":
             first_name, last_name = create_name(faker_locale, gender)
-            dupe["First Name"] = first_name
+            dupe["first_name"] = first_name
         if name_change_option == "change last name":
             first_name, last_name = create_name(faker_locale, gender)
-            dupe["Last Name"] = last_name
+            dupe["last_name"] = last_name
         if name_change_option == "flip names":
-            dupe["First Name"], dupe["Last Name"] = (
-                base_record["Last Name"],
-                base_record["First Name"],
+            dupe["first_name"], dupe["last_name"] = (
+                base_record["last_name"],
+                base_record["first_name"],
             )
         if name_change_option == "misspelling":
             if random.random() < 0.50:
-                dupe["First Name"] = introduce_spelling_errors(
-                    base_record["First Name"], 1
+                dupe["first_name"] = introduce_spelling_errors(
+                    base_record["first_name"], 1
                 )
             else:
-                dupe["Last Name"] = introduce_spelling_errors(
-                    base_record["Last Name"], 1
+                dupe["last_name"] = introduce_spelling_errors(
+                    base_record["last_name"], 1
                 )
 
         dupe_reason += " - " + name_change_option
 
     if dupe_reason == "birthday change":
-        birthday = parser.parse(base_record["Date of Birth"])
+        birthday = parser.parse(base_record["date_of_birth"])
         delta = random.choice([-1, 1])
         new_birthday = birthday + timedelta(days=delta)
-        dupe["Date of Birth"] = new_birthday.strftime("%Y-%m-%d")
+        dupe["date_of_birth"] = new_birthday.strftime("%Y-%m-%d")
 
     if dupe_reason == "address change":
         new_address = (
@@ -559,18 +558,25 @@ def add_duplicate_record(
             + " "
             + fake_us.zipcode()
         )
-        dupe["Last Known Address"] = new_address
+        dupe["last_known_address"] = new_address
 
-    dupe["Lead ID"] = duplicate_lead_id
-    dupe["Lead Source"] = duplicate_lead_source
-    dupe["IsDupe"] = True
-    dupe["Dupe Reason"] = dupe_reason
+    if dupe_reason == "anumber change":
+        dupe["anumber"] = "A" + str(fake.random_int(min=1000000, max=999999999))
+
+    dupe["lead_id"] = uuid4().hex[0:16]
+    dupe["lead_source"] = lead_source = fake.random_element(["CBP", "Local LE", "Tip", "Other"])
+    dupe["is_dupe"] = True
+    dupe["dupe_reason"] = dupe_reason
+    # convert record date from string to datetime
+    record_date = parser.parse(base_record["record_date"]) + timedelta(days=random.randint(180, 365))
+    dupe["record_date"] = record_date.strftime("%Y-%m-%d")
+
 
     dupe = clear_out_random_fields(dupe)
     dupe = misspell_random_fields(dupe)
     dupe = all_caps_random_fields(dupe)
-    dupe["First Name"] = replace_accented_chars(dupe["First Name"])
-    dupe["Last Name"] = replace_accented_chars(dupe["Last Name"])
+    dupe["first_name"] = replace_accented_chars(dupe["first_name"])
+    dupe["last_name"] = replace_accented_chars(dupe["last_name"])
 
     return dupe
 
@@ -587,12 +593,16 @@ for country, details in config_data.items():
     for _ in range(count):
         lead_id = uuid4().hex[0:16]
         duplicate_lead_id = uuid4().hex[0:16]
+        record_date = fake.date_this_decade().strftime("%Y-%m-%d")
 
         gender = fake.random_element(["M", "F"])
         first_name, last_name = create_name(faker_locale, gender)
-        height_feet = random.randint(4, 6)
-        height_inches = random.randint(0, 11) + 1
+        height_inches = random.randint(
+            58, 78
+        )  # Total height in inches for average adult human range
         weight = random.randint(100, 250)
+        # anumber is "A" followed by 7-9 digits
+        alien_number = "A" + str(fake.random_int(min=1000000, max=999999999))
         distinquishing_marks = ""
         # 20% of time show distinquishing marks
         if random.random() < 0.2:
@@ -836,52 +846,198 @@ for country, details in config_data.items():
         dedupe_id = lead_id
 
         base_record = {
-            "Dedupe ID": dedupe_id,
-            "IsDupe": False,
-            "Dupe Reason": "",
-            "Lead ID": lead_id,
-            "Lead Source": lead_source,
-            "First Name": first_name,
-            "Last Name": last_name,
-            "Date of Birth": dob,
-            "Country of Origin": country_of_origin,
-            "Gender": gender,
-            "Height (feet)": height_feet,
-            "Height (inches)": height_inches,
-            "Weight": weight,
-            "Distinguishing Marks": distinquishing_marks,
-            "Fingerprint Hash": fingerprint_hash,
-            "Last Known Address": full_address,
-            "Latitude": latitude,
-            "Longitude": longitude,
-            "Immigration Status": immigration_status,
-            "Visa Type": visa_type,
-            "Visa Expiration Date": visa_expiration_date,
-            "Known Border Crossing(s)": known_border_crossings_single,
-            "Past Deportations": past_deportation,
-            "Current Location": current_location,
-            "Risk Level": risk_level,
-            "Alias": alias,
-            "Phone Number": phone_number,
-            "Known Associates": known_associates,
-            "Organized Crime Links": organized_crime_links,
-            "Case Officer Assigned": case_officer_assigned,
-            "Investigation Status": investigation_status,
-            "Legal Proceedings": legal_proceedings,
-            "Deportation Orders": deportation_order,
+            "dedupe_id": dedupe_id,
+            "is_dupe": False,
+            "dupe_reason": "",
+            "lead_id": lead_id,
+            "record_date": record_date,
+            "lead_source": lead_source,
+            "first_name": first_name,
+            "last_name": last_name,
+            "alias": alias,
+            "date_of_birth": dob,
+            "country_of_origin": country_of_origin,
+            "anumber": alien_number,
+            "gender": gender,
+            "height_inches": height_inches,
+            "weight": weight,
+            "fingerprint_hash": fingerprint_hash,
+            "last_known_address": full_address,
+            "legal_proceedings": legal_proceedings,
+            "phone_number": phone_number,
+            "risk_level": risk_level,
+            "distinguishing_marks": distinquishing_marks,
+            "latitude": latitude,
+            "longitude": longitude,
+            "immigration_status": immigration_status,
+            "visa_type": visa_type,
+            "visa_expiration_date": visa_expiration_date,
+            "known_border_crossings": known_border_crossings_single,
+            "past_deportations": past_deportation,
+            "current_location": current_location,
+            "known_associates": known_associates,
+            "organized_crime_links": organized_crime_links,
+            "case_officer_assigned": case_officer_assigned,
+            "investigation_status": investigation_status,
+            "deportation_orders": deportation_order,
         }
         fake_records.append(base_record)
 
         # Add duplicate records
-        if random.random() < 0.15:
-            dupe = add_duplicate_record(
-                base_record,
-                faker_locale,
-                gender,
-                duplicate_lead_id,
-                duplicate_lead_source,
-            )
-            fake_records.append(dupe)
+
+        if random.random() < PERCENT_DUPES:
+            number_of_fakes = random.randint(1, 5)
+            for i in range(number_of_fakes):
+                dupe = add_duplicate_record(
+                    base_record,
+                    faker_locale,
+                    gender,
+                    duplicate_lead_id,
+                    duplicate_lead_source,
+                )
+                fake_records.append(dupe)
+
+
+hardcoded_data = [
+    {
+        "dedupe_id": "0ffa8be931c44600",
+        "is_dupe": False,
+        "dupe_reason": "",
+        "lead_id": "0ffa8be931c44600",
+        "record_date": "2023-10-01",
+        "lead_source": "Local LE",
+        "first_name": "Emilio",
+        "last_name": "Salamanca",
+        "date_of_birth": "1997-08-22",
+        "country_of_origin": "Mexico",
+        "anumber": "",
+        "gender": "M",
+        "height_inches": 74,
+        "weight": 229,
+        "distinguishing_marks": "Skull tattoo on calf",
+        "fingerprint_hash": "",
+        "last_known_address": "688 Jensen Circle Suite 512, Los Angeles, CA 20926",
+        "latitude": 34.62970061575755,
+        "longitude": -118.07215299038508,
+        "past_deportations": "",
+        "risk_level": "Low",
+        "alias": "",
+        "phone_number": "698-686-8675",
+        "known_associates": "",
+        "organized_crime_links": "",
+        "case_officer_assigned": "Mann, Vickie (Badge # 6870)",
+        "deportation_orders": "",
+        "legal_proceedings": "Arrested for DUI",
+    },
+    {
+        "dedupe_id": "0ffa8be931c44600",
+        "is_dupe": True,
+        "dupe_reason": "",
+        "lead_id": "0ffa8be931c44601",
+        "record_date": "2024-06-12",
+        "lead_source": "Local LE",
+        "first_name": "Emilio",
+        "last_name": "Salomanca",
+        "date_of_birth": "1997-08-22",
+        "country_of_origin": "Mexico",
+        "anumber": "A571306955",
+        "gender": "M",
+        "height_inches": 74,
+        "weight": 229,
+        "distinguishing_marks": "Skull tattoo on calf",
+        "fingerprint_hash": "94k2j82730",
+        "last_known_address": "688 Jensen Circle Suite 512, Los Angeles, CA 20926",
+        "latitude": 34.62970061575755,
+        "longitude": -118.07215299038508,
+        "past_deportations": "",
+        "risk_level": "High",
+        "alias": "Milo",
+        "phone_number": "698-686-8657",
+        "known_associates": "",
+        "organized_crime_links": "",
+        "case_officer_assigned": "",
+        "deportation_orders": "",
+        "legal_proceedings": "Arrested for assault",
+    },
+        {
+        "dedupe_id": "0ffa8be931c44600",
+        "is_dupe": True,
+        "dupe_reason": "",
+        "lead_id": "0ffa8be931c44602",
+        "record_date": "2025-01-03",
+        "lead_source": "Tip",
+        "first_name": "Milo",
+        "last_name": "Salamanca",
+        "date_of_birth": "1997-08-22",
+        "country_of_origin": "Mexico",
+        "anumber": "A571306955",
+        "gender": "M",
+        "height_inches": 74,
+        "weight": 229,
+        "distinguishing_marks": "Skull tattoo on calf",
+        "fingerprint_hash": "94k2j82730",
+        "last_known_address": "78654 Chavez Passage, Los Angeles, CA 85700-6041",
+        "latitude": 33.53413927,
+        "longitude": -117.732472,
+        "past_deportations": "",
+        "risk_level": "Medium",
+        "alias": "",
+        "phone_number": "698-686-8675",
+        "known_associates": "",
+        "organized_crime_links": "",
+        "case_officer_assigned": "",
+        "deportation_orders": "",
+        "legal_proceedings": "", 	
+    },
+]
+
+fake_records.extend(hardcoded_data)
+
+# remove a set of fields from the fake_records since they really are not needed
+fields_to_keep = [
+    "dedupe_id",
+    "is_dupe",
+    "dupe_reason",
+    "lead_id",
+    "record_date",
+    "lead_source",
+    "first_name",
+    "last_name",
+    "date_of_birth",
+    "country_of_origin",
+    "anumber",
+    "gender",
+    "height_inches",
+    "weight",
+    "distinguishing_marks",
+    "fingerprint_hash",
+    "last_known_address",
+    "latitude",
+    "longitude",
+    "past_deportations",
+    "risk_level",
+    "alias",
+    "phone_number",
+    "legal_proceedings",
+    "known_associates",
+    "organized_crime_links",
+    "case_officer_assigned",
+    "deportation_orders",
+]
+assert "record_date" in fake_records[0], "before trimming"
+
+# filter the records to only keep the fields we want
+fake_records = [
+    {k: v for k, v in record.items() if k in fields_to_keep} for record in fake_records
+]
+assert "record_date" in fake_records[0]
+
+print(json.dumps(fake_records[0:3], indent=3, default=str))
+
+# add row_id counter to each record
+for i, record in enumerate(fake_records):
+    record["row_id"] = i + 1
+
 
 
 # Convert to DataFrame
@@ -889,16 +1045,16 @@ df = pd.DataFrame(fake_records)
 
 # Save the training version with duplicate training fields
 csv_filename = "fake_immigrant_records_training.csv"
-df.to_csv(csv_filename, index=False, encoding="windows-1252", quoting=csv.QUOTE_ALL)
+df.to_csv(csv_filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
 
 
 # shuffle the records
 df = df.sample(frac=1).reset_index(drop=True)
-# remove these columns: Dedupe ID, IsDupe, Dupe Reason, 
-df = df.drop(columns=["Dedupe ID", "IsDupe", "Dupe Reason"])
+# remove these columns: Dedupe ID, IsDupe, Dupe Reason,
+df = df.drop(columns=["dedupe_id", "is_dupe", "dupe_reason"])
 # Save the testing version without duplicate training fields
 csv_filename = "fake_immigrate_records_testing.csv"
-df.to_csv(csv_filename, index=False, encoding="windows-1252", quoting=csv.QUOTE_ALL)
+df.to_csv(csv_filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
 
 
 print(f"Fake immigrant records have been saved to {csv_filename}")

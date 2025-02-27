@@ -179,3 +179,4 @@ reports/**/**
 *.json
 !requirements.txt
 !report_template_json.txt
+.env
