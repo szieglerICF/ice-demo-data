@@ -12,8 +12,8 @@ from indic_transliteration import sanscript
 from indic_transliteration.sanscript import transliterate
 
 # Configuration data
-PERCENT_DUPES = .15
-mexico_count = 100
+PERCENT_DUPES = 0.15
+mexico_count = 2800
 el_salvador_count = int(mexico_count * 0.6)
 guatemala_count = int(mexico_count * 0.4)
 honduras_count = int(mexico_count * 0.5)
@@ -54,6 +54,36 @@ config_data = {
                 "latitude": 33.4484,
                 "longitude": -112.0740,
             },
+            {
+                "city": "El Paso",
+                "state": "TX",
+                "latitude": 31.7619,
+                "longitude": -106.4850,
+            },
+            {
+                "city": "Laredo",
+                "state": "TX",
+                "latitude": 27.5306,
+                "longitude": -99.4803,
+            },
+            {
+                "city": "McAllen",
+                "state": "TX",
+                "latitude": 26.2034,
+                "longitude": -98.2300,
+            },
+            {
+                "city": "Brownsville",
+                "state": "TX",
+                "latitude": 25.9017,
+                "longitude": -97.4975,
+            },
+            {
+                "city": "Eagle Pass",
+                "state": "TX",
+                "latitude": 28.7091,
+                "longitude": -100.4995,
+            },
         ],
     },
     "El Salvador": {
@@ -91,6 +121,24 @@ config_data = {
                 "latitude": 32.7767,
                 "longitude": -96.7970,
             },
+            {
+                "city": "El Paso",
+                "state": "TX",
+                "latitude": 31.7619,
+                "longitude": -106.4850,
+            },
+            {
+                "city": "Laredo",
+                "state": "TX",
+                "latitude": 27.5306,
+                "longitude": -99.4803,
+            },
+            {
+                "city": "McAllen",
+                "state": "TX",
+                "latitude": 26.2034,
+                "longitude": -98.2300,
+            },
         ],
     },
     "Guatemala": {
@@ -127,6 +175,17 @@ config_data = {
                 "state": "RI",
                 "latitude": 41.8240,
                 "longitude": -71.4128,
+            },            {
+                "city": "Brownsville",
+                "state": "TX",
+                "latitude": 25.9017,
+                "longitude": -97.4975,
+            },
+            {
+                "city": "Eagle Pass",
+                "state": "TX",
+                "latitude": 28.7091,
+                "longitude": -100.4995,
             },
         ],
     },
@@ -302,10 +361,10 @@ indian_names = {
 fake_records = []
 
 
-def create_indian_name(gender):
+def create_indian_name(sex):
     first_name = random.choice(
         indian_names["male_first_names"]
-        if gender == "M"
+        if sex == "M"
         else indian_names["female_first_names"]
     )
     last_name = random.choice(indian_names["last_names"])
@@ -321,11 +380,11 @@ def create_indian_name(gender):
     return first_name, last_name
 
 
-def create_name(faker_locale, gender):
+def create_name(faker_locale, sex):
     fake = Faker(faker_locale)
     fake_us = Faker("en_US")
     first_name = fake.first_name()
-    if gender == "M":
+    if sex == "M":
         first_name = fake.first_name_male()
     else:
         first_name = fake.first_name_female()
@@ -336,7 +395,7 @@ def create_name(faker_locale, gender):
         last_name = fake.last_name()
 
     if faker_locale == "hi_IN":
-        first_name, last_name = create_indian_name(gender)
+        first_name, last_name = create_indian_name(sex)
     if faker_locale == "en_US":
         first_name = fake_us.first_name()
         last_name = fake_us.last_name()
@@ -378,14 +437,10 @@ def introduce_spelling_errors(text, n):
 def clear_out_random_fields(record):
     changeable_fields = [
         "date_of_birth",
-        "country_of_origin",
         "anumber",
-        "gender",
         "height_inches",
         "weight",
         "last_known_address",
-        "latitude",
-        "longitude",
         "immigration_status",
         "visa_type",
         "visa_expiration_date",
@@ -414,7 +469,7 @@ def all_caps_random_fields(record):
         "last_name",
         "date_of_birth",
         "anumber",
-        "gender",
+        "sex",
         "height_inches",
         "weight",
         "last_known_address",
@@ -446,7 +501,6 @@ def all_caps_random_fields(record):
 
 def misspell_random_fields(record):
     changeable_fields = [
-        "gender",
         "height_inches",
         "weight",
         "last_known_address",
@@ -497,7 +551,7 @@ def replace_accented_chars(text):
 
 
 def add_duplicate_record(
-    base_record, faker_locale, gender, duplicate_lead_id, duplicate_lead_source
+    base_record, faker_locale, sex, duplicate_lead_id, duplicate_lead_source
 ):
     dupe = base_record.copy()
 
@@ -520,10 +574,10 @@ def add_duplicate_record(
         name_change_option = random.choice(name_change_options)
 
         if name_change_option == "change first name":
-            first_name, last_name = create_name(faker_locale, gender)
+            first_name, last_name = create_name(faker_locale, sex)
             dupe["first_name"] = first_name
         if name_change_option == "change last name":
-            first_name, last_name = create_name(faker_locale, gender)
+            first_name, last_name = create_name(faker_locale, sex)
             dupe["last_name"] = last_name
         if name_change_option == "flip names":
             dupe["first_name"], dupe["last_name"] = (
@@ -564,13 +618,16 @@ def add_duplicate_record(
         dupe["anumber"] = "A" + str(fake.random_int(min=1000000, max=999999999))
 
     dupe["lead_id"] = uuid4().hex[0:16]
-    dupe["lead_source"] = lead_source = fake.random_element(["CBP", "Local LE", "Tip", "Other"])
+    dupe["lead_source"] = lead_source = fake.random_element(
+        ["CBP", "Local LE", "Tip", "Other"]
+    )
     dupe["is_dupe"] = True
     dupe["dupe_reason"] = dupe_reason
     # convert record date from string to datetime
-    record_date = parser.parse(base_record["record_date"]) + timedelta(days=random.randint(180, 365))
+    record_date = parser.parse(base_record["record_date"]) + timedelta(
+        days=random.randint(180, 365)
+    )
     dupe["record_date"] = record_date.strftime("%Y-%m-%d")
-
 
     dupe = clear_out_random_fields(dupe)
     dupe = misspell_random_fields(dupe)
@@ -595,8 +652,8 @@ for country, details in config_data.items():
         duplicate_lead_id = uuid4().hex[0:16]
         record_date = fake.date_this_decade().strftime("%Y-%m-%d")
 
-        gender = fake.random_element(["M", "F"])
-        first_name, last_name = create_name(faker_locale, gender)
+        sex = fake.random_element(["M", "F"])
+        first_name, last_name = create_name(faker_locale, sex)
         height_inches = random.randint(
             58, 78
         )  # Total height in inches for average adult human range
@@ -709,7 +766,7 @@ for country, details in config_data.items():
         # 5% of time show alias
         alias = ""
         if random.random() < 0.05:
-            alias_first, alias_last = create_name(faker_locale, gender)
+            alias_first, alias_last = create_name(faker_locale, sex)
             alias = f"{alias_first} {alias_last}"
 
         phone_number = fake.phone_number()
@@ -732,7 +789,7 @@ for country, details in config_data.items():
         family_associate = ""
         if random.random() < 0.1:
             family_associate_first, family_associate_last = create_name(
-                faker_locale, gender
+                faker_locale, sex
             )
             family_associate = (
                 f"{family_associate_first} {family_associate_last} (Family)"
@@ -741,7 +798,7 @@ for country, details in config_data.items():
         known_accomplice = ""
         if random.random() < 0.05:
             known_accomplice_first, known_accomplice_last = create_name(
-                faker_locale, gender
+                faker_locale, sex
             )
             known_accomplice = (
                 f"{known_accomplice_first} {known_accomplice_last} (Accomplice)"
@@ -765,7 +822,7 @@ for country, details in config_data.items():
         # 65% of time show case officer assigned
         case_officer_assigned = ""
         if random.random() < 0.65:
-            first, last = create_name("en_US", gender)
+            first, last = create_name("en_US", sex)
             case_officer_assigned = (
                 f"{last}, {first} (Badge # {fake.random_int(min=1000, max=9999)})"
             )
@@ -858,7 +915,7 @@ for country, details in config_data.items():
             "date_of_birth": dob,
             "country_of_origin": country_of_origin,
             "anumber": alien_number,
-            "gender": gender,
+            "sex": sex,
             "height_inches": height_inches,
             "weight": weight,
             "fingerprint_hash": fingerprint_hash,
@@ -891,7 +948,7 @@ for country, details in config_data.items():
                 dupe = add_duplicate_record(
                     base_record,
                     faker_locale,
-                    gender,
+                    sex,
                     duplicate_lead_id,
                     duplicate_lead_source,
                 )
@@ -911,7 +968,7 @@ hardcoded_data = [
         "date_of_birth": "1997-08-22",
         "country_of_origin": "Mexico",
         "anumber": "",
-        "gender": "M",
+        "sex": "M",
         "height_inches": 74,
         "weight": 229,
         "distinguishing_marks": "Skull tattoo on calf",
@@ -941,7 +998,7 @@ hardcoded_data = [
         "date_of_birth": "1997-08-22",
         "country_of_origin": "Mexico",
         "anumber": "A571306955",
-        "gender": "M",
+        "sex": "M",
         "height_inches": 74,
         "weight": 229,
         "distinguishing_marks": "Skull tattoo on calf",
@@ -959,7 +1016,7 @@ hardcoded_data = [
         "deportation_orders": "",
         "legal_proceedings": "Arrested for assault",
     },
-        {
+    {
         "dedupe_id": "0ffa8be931c44600",
         "is_dupe": True,
         "dupe_reason": "",
@@ -971,7 +1028,7 @@ hardcoded_data = [
         "date_of_birth": "1997-08-22",
         "country_of_origin": "Mexico",
         "anumber": "A571306955",
-        "gender": "M",
+        "sex": "M",
         "height_inches": 74,
         "weight": 229,
         "distinguishing_marks": "Skull tattoo on calf",
@@ -987,13 +1044,13 @@ hardcoded_data = [
         "organized_crime_links": "",
         "case_officer_assigned": "",
         "deportation_orders": "",
-        "legal_proceedings": "", 	
+        "legal_proceedings": "",
     },
 ]
 
 fake_records.extend(hardcoded_data)
 
-# remove a set of fields from the fake_records since they really are not needed
+
 fields_to_keep = [
     "dedupe_id",
     "is_dupe",
@@ -1006,7 +1063,7 @@ fields_to_keep = [
     "date_of_birth",
     "country_of_origin",
     "anumber",
-    "gender",
+    "sex",
     "height_inches",
     "weight",
     "distinguishing_marks",
@@ -1034,27 +1091,21 @@ assert "record_date" in fake_records[0]
 
 print(json.dumps(fake_records[0:3], indent=3, default=str))
 
-# add row_id counter to each record
+# add others to each record
 for i, record in enumerate(fake_records):
     record["row_id"] = i + 1
-
+    # set authoritative_record to opposite of is_dupe
+    record["authoritative_record"] = not record["is_dupe"]
+    record["lead_priority"] = ""
 
 
 # Convert to DataFrame
 df = pd.DataFrame(fake_records)
 
 # Save the training version with duplicate training fields
-csv_filename = "fake_immigrant_records_training.csv"
+tmsp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+csv_filename = f"ice_data_{tmsp}.csv"
 df.to_csv(csv_filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
 
 
-# shuffle the records
-df = df.sample(frac=1).reset_index(drop=True)
-# remove these columns: Dedupe ID, IsDupe, Dupe Reason,
-df = df.drop(columns=["dedupe_id", "is_dupe", "dupe_reason"])
-# Save the testing version without duplicate training fields
-csv_filename = "fake_immigrate_records_testing.csv"
-df.to_csv(csv_filename, index=False, encoding="utf-8", quoting=csv.QUOTE_ALL)
-
-
-print(f"Fake immigrant records have been saved to {csv_filename}")
+print(f"{len(fake_records):,} fake immigrant records have been saved to {csv_filename}")

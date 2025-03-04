@@ -25,3 +25,5 @@ langchain_community
 colorama
 dedupe
 unidecode
+azure-ai-projects 
+azure-identity
