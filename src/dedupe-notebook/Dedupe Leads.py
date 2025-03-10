@@ -90,6 +90,13 @@ deduper = dedupe.Dedupe(fields)
 
 # COMMAND ----------
 
+# show the cluster for lead_id in this list "0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be931c44602"
+sample = df[df["lead_id"].isin(["0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be931c44602"])]
+
+display(sample)
+
+# COMMAND ----------
+
 output_file = "dedupe_output.csv"
 settings_file = "dedupe_config_settings"
 training_file = "dedupe_config_training.json"
@@ -160,7 +167,7 @@ for cluster_id, (records, scores) in enumerate(clustered_dupes):
         }
 
 print(cluster_membership)
-print(json.dumps(cluster_membership, indent=3))
+print(json.dumps(cluster_membership, indent=3, default=str))
 
 df = df.join(pd.DataFrame.from_dict(cluster_membership, orient="index"))
 df.head()
@@ -170,12 +177,414 @@ df.head()
 
 # COMMAND ----------
 
-df = df[ ["Cluster ID", "confidence_score", "lead_id", "record_date", "anumber", "fingerprint_hash", "first_name", "last_name", "country_of_origin", "last_known_address", "date_of_birth", "phone_number", "distinguishing_marks"] ]
+df = df[ [ "Cluster ID", "confidence_score", "lead_id", "record_date", "anumber", "fingerprint_hash", "first_name", "last_name", "country_of_origin", "last_known_address", "date_of_birth", "phone_number", "distinguishing_marks"] ]
+
+
+
+
+# COMMAND ----------
 
 # show the cluster for lead_id in this list "0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be931c44602"
-sample = df[df["dedupe_id"].isin(["0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be931c44602"])]
+milo_df = df[df["lead_id"].isin(["0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be931c44602"])].sort_values("record_date")
 
-display(sample)
+display(milo_df)
+
+# Iterate over columns instead of rows
+new_data = []
+for col in milo_df.columns:
+    new_row = [col] + [str(x) for x in milo_df[col].tolist()]
+    new_data.append(new_row)
+
+# Create new DataFrame with flipped rows and columns
+new_columns = ['Original_Index'] + milo_df.index.tolist()
+df_flipped = pd.DataFrame(new_data, columns=new_columns)
+
+milo_html = df_flipped.to_html()
 
 
 
+# COMMAND ----------
+
+
+
+emoji_map = {
+    "Cluster ID": "🆔",
+    "confidence_score": "📊",
+    "lead_id": "🔍",
+    "record_date": "📅",
+    "anumber": "🔢",
+    "fingerprint_hash": "🆔",
+    "first_name": "🧑",
+    "last_name": "🧑",
+    "country_of_origin": "🌍",
+    "last_known_address": "🏠",
+    "date_of_birth": "🎂",
+    "phone_number": "📞",
+    "distinguishing_marks": "🔎"
+}
+
+# update the html to find the text in the emoji map and prepend the emoji to that text
+for key, value in emoji_map.items():
+    milo_html = milo_html.replace(key, f"{value} {key}")
+
+print(milo_html)
+
+
+
+# COMMAND ----------
+
+custom_milo_formatted = """
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>Original_Index</th>
+      <th>10555</th>
+      <th>10556</th>
+      <th>10557</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td style="text-align:left">📊 confidence_score</td>
+      <td style="text-align:left">87</td>
+      <td style="text-align:left">90</td>
+      <td style="text-align:left">91</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td style="text-align:left">🔍 lead_id</td>
+      <td style="text-align:left">0ffa8be931c44600</td>
+      <td style="text-align:left">0ffa8be931c44601</td>
+      <td style="text-align:left">0ffa8be931c44602</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td style="text-align:left">📅 record_date</td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">2023-10-01</span></td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">2024-06-12</span></td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">2025-01-03</span></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td style="text-align:left">🔢 anumber</td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">None</span></td>
+      <td style="text-align:left">a571306955</td>
+      <td style="text-align:left">a571306955</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td style="text-align:left">🆔 fingerprint_hash</td>
+      <td style="text-align:left">94k2j82730</td>
+      <td style="text-align:left">94k2j82730</td>
+      <td style="text-align:left">94k2j82730</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td style="text-align:left">🧑 first_name</td>
+      <td style="text-align:left">emilio</td>
+      <td style="text-align:left">emilio</td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">milo</span></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td style="text-align:left">🧑 last_name</td>
+      <td style="text-align:left">salamanca</td>
+      <td style="text-align:left">sal<span style="color:red; font-weight:bold">o</span>manca</td>
+      <td style="text-align:left">salamanca</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td style="text-align:left">🌍 country_of_origin</td>
+      <td style="text-align:left">mexico</td>
+      <td style="text-align:left">mexico</td>
+      <td style="text-align:left">mexico</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td style="text-align:left">🏠 last_known_address</td>
+      <td style="text-align:left">688 jensen circle suite 512, los angeles, ca 20926</td>
+      <td style="text-align:left">688 jensen circle suite 512, los angeles, ca 20926</td>
+      <td style="text-align:left"><span style="color:red; font-weight:bold">78654 chavez passage, los angeles, ca 85700-6041</span></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td style="text-align:left">🎂 date_of_birth</td>
+      <td style="text-align:left">1997-08-22</td>
+      <td style="text-align:left">1997-08-22</td>
+      <td style="text-align:left">1997-08-22</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td style="text-align:left">📞 phone_number</td>
+      <td style="text-align:left">698-686-8675</td>
+      <td style="text-align:left">698-686-86<span style="color:red; font-weight:bold">57</span></td>
+      <td style="text-align:left">698-686-8675</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td style="text-align:left">🔎 distinguishing_marks</td>
+      <td style="text-align:left">skull tattoo on calf</td>
+      <td style="text-align:left">skull tattoo on calf</td>
+      <td style="text-align:left">skull tattoo on calf</td>
+    </tr>
+  </tbody>
+</table>
+"""
+
+
+displayHTML(custom_milo_formatted)
+
+
+
+# COMMAND ----------
+
+from pyspark.sql.functions import col
+
+# find clusters with at least 3 records
+df = df.groupby("Cluster ID").filter(lambda x: len(x) > 2)
+
+# find a cluster with confidence scores > 85%
+df = df[df["confidence_score"] > 0.85]
+
+# show cluster 118 sorted by record date ascending
+df_118 = df[df["Cluster ID"] == 118].sort_values("record_date")
+display(df_118)
+
+# move the record date as teh first column
+df_118 = df_118[["record_date"] + [c for c in df_118.columns if c != "record_date"]]
+
+# COMMAND ----------
+
+
+# Assuming df_118 is already defined
+new_data = []
+
+# convert the confidence score into a string as a %
+df_118["confidence_score"] = round( df_118["confidence_score"] * 100)
+
+# remove the decimal places
+df_118["confidence_score"] = df_118["confidence_score"].astype(str)
+
+
+
+
+# Iterate over columns instead of rows
+for col in df_118.columns:
+    new_row = [col] + [str(x) for x in df_118[col].tolist()]
+    new_data.append(new_row)
+
+# Create new DataFrame with flipped rows and columns
+new_columns = ['Original_Index'] + df_118.index.tolist()
+df_flipped = pd.DataFrame(new_data, columns=new_columns)
+
+
+
+
+
+
+# COMMAND ----------
+
+html = df_flipped.to_html()
+
+emoji_map = {
+    "Cluster ID": "🆔",
+    "confidence_score": "📊",
+    "lead_id": "🔍",
+    "record_date": "📅",
+    "anumber": "🔢",
+    "fingerprint_hash": "🆔",
+    "first_name": "🧑",
+    "last_name": "🧑",
+    "country_of_origin": "🌍",
+    "last_known_address": "🏠",
+    "date_of_birth": "🎂",
+    "phone_number": "📞",
+    "distinguishing_marks": "🔎"
+}
+
+# update the html to find the text in the emoji map and prepend the emoji to that text
+for key, value in emoji_map.items():
+    html = html.replace(key, f"{value} {key}")
+
+
+
+
+# for the anumber row of data, color the None values bold red
+html = html.replace("""    <tr>
+      <th>4</th>
+      <td>🔢 anumber</td>
+      <td>a465482608</td>
+      <td>None</td>
+      <td>None</td>
+      <td>a465482608</td>
+    </tr>""", """    <tr>
+      <th>4</th>
+      <td>🔢 anumber</td>
+      <td>a465482608</td>
+      <td><b style="color:red;">None</b></td>
+      <td><b style="color:red;">None</b></td>
+      <td>a465482608</td>
+    </tr>""")
+
+# add align center for each td
+html = html.replace("<td>", "<td style='text-align:left'>")
+
+html = html.replace("""<tr>
+      <th>9</th>
+      <td style='text-align:left'>🏠 last_known_address</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, xhouston, tx 33954</td>
+      <td style='text-align:left'>8348 brian spur suite 656, hayesberg, ohio 94499</td>
+    </tr>""", """<tr>
+      <th>9</th>
+      <td style='text-align:left'>🏠 last_known_address</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, <span style='color: red; font-weight:bold;'>x</span>houston, tx 33954</td>
+      <td style='text-align:left; color: red; font-weight:bold'>8348 brian spur suite 656, hayesberg, ohio 94499</td>
+    </tr>""")
+
+html = html.replace("""<tr>
+      <th>10</th>
+      <td style='text-align:left'>🎂 date_of_birth</td>
+      <td style='text-align:leftleft'>1997-10-14</td>
+      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left'>None</td>
+      <td style='text-align:left'>1997-10-14</td>
+    </tr>""", """<tr>
+      <th>10</th>
+      <td style='text-align:left'>🎂 date_of_birth</td>
+      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left; color: red; font-weight: bold'>None</td>
+      <td style='text-align:left'>1997-10-14</td>
+    </tr>""")
+
+print(html)
+
+custom_html_118 = """
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Original_Index</th>
+      <th>2</th>
+      <th>5</th>
+      <th>4</th>
+      <th>3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td style='text-align:left'>📅 record_date</td>
+      <td style='text-align:left'>2022-05-17</td>
+      <td style='text-align:left'>2023-02-03</td>
+      <td style='text-align:left'>2023-04-16</td>
+      <td style='text-align:left'>2023-05-15</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td style='text-align:left'>🆔 Cluster ID</td>
+      <td style='text-align:left'>118</td>
+      <td style='text-align:left'>118</td>
+      <td style='text-align:left'>118</td>
+      <td style='text-align:left'>118</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td style='text-align:left'>📊 confidence_score</td>
+      <td style='text-align:left'>92.0</td>
+      <td style='text-align:left'>92.0</td>
+      <td style='text-align:left'>93.0</td>
+      <td style='text-align:left'>91.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td style='text-align:left'>🔍 lead_id</td>
+      <td style='text-align:left'>1d34d1b9a50941a1</td>
+      <td style='text-align:left'>e239ae4565a84bb1</td>
+      <td style='text-align:left'>29ed03321e454f58</td>
+      <td style='text-align:left'>21cc2bb618b34815</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td style='text-align:left'>🔢 anumber</td>
+      <td style='text-align:left'>a465482608</td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
+      <td style='text-align:left'>a465482608</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td style='text-align:left'>🆔 fingerprint_hash</td>
+      <td style='text-align:left'>9d5d1dea40</td>
+      <td style='text-align:left'>9d5d1dea40</td>
+      <td style='text-align:left'>9d5d1dea40</td>
+      <td style='text-align:left'>9d5d1dea40</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td style='text-align:left'>🧑 first_name</td>
+      <td style='text-align:left'>teodoro</td>
+      <td style='text-align:left'>teodoro</td>
+      <td style='text-align:left'>teodoro</td>
+      <td style='text-align:left'>teodoro</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td style='text-align:left'>🧑 last_name</td>
+      <td style='text-align:left'>ulibarri</td>
+      <td style='text-align:left'>ulibarri</td>
+      <td style='text-align:left'>ulibarri</td>
+      <td style='text-align:left'>ulibarri</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td style='text-align:left'>🌍 country_of_origin</td>
+      <td style='text-align:left'>mexico</td>
+      <td style='text-align:left'>mexico</td>
+      <td style='text-align:left'>mexico</td>
+      <td style='text-align:left'>mexico</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td style='text-align:left'>🏠 last_known_address</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, houston, tx 33954</td>
+      <td style='text-align:left'>0789 ryan ferry suite 792, <span style='color: red; font-weight:bold;'>x</span>houston, tx 33954</td>
+      <td style='text-align:left; color: red; font-weight:bold'>8348 brian spur suite 656, hayesberg, ohio 94499</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td style='text-align:left'>🎂 date_of_birth</td>
+      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left'><span style="color: red; font-weight:bold;">None</span></td>
+      <td style='text-align:left'>1997-10-14</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td style='text-align:left'>📞 phone_number</td>
+      <td style='text-align:left'>(775)064-1321</td>
+      <td style='text-align:left'>(775)064-13<span style="color:red; font-weight:bold;">12</style></td>
+      <td style='text-align:left'>(775)064-1321</td>
+      <td style='text-align:left'>(775)064-1321</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td style='text-align:left'>🔎 distinguishing_marks</td>
+      <td style='text-align:left'>None</td>
+      <td style='text-align:left'>None</td>
+      <td style='text-align:left'>None</td>
+      <td style='text-align:left'>None</td>
+    </tr>
+  </tbody>
+</table>
+"""
+
+
+displayHTML(custom_html_118)
