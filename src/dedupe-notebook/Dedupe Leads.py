@@ -11,6 +11,13 @@ pip install unidecode
 # COMMAND ----------
 
 # MAGIC %sql
+# MAGIC /*
+# MAGIC ####################################################################
+# MAGIC # ➡️ Show profile of raw, dirty data
+# MAGIC ####################################################################
+# MAGIC */
+# MAGIC
+# MAGIC
 # MAGIC SELECT * FROM `hive_metastore`.`default`.`ice_data_2025_02_28_135500_2_csv`;
 # MAGIC
 # MAGIC
@@ -72,6 +79,11 @@ df.head(5)
 
 # COMMAND ----------
 
+####################################################################
+# ➡️ Show field selection for Python dedupe library
+####################################################################
+
+
 # Step 2:  Define the fields dedupe will pay attention to
 fields = [
     dedupe.variables.String("anumber", has_missing=True),
@@ -79,6 +91,7 @@ fields = [
     dedupe.variables.String("first_name", has_missing=False),
     dedupe.variables.String("last_name", has_missing=False),
     dedupe.variables.String("country_of_origin", has_missing=False),
+    
     dedupe.variables.String("last_known_address", has_missing=False),
     dedupe.variables.String("date_of_birth", has_missing=False),
     dedupe.variables.String("phone_number", has_missing=False),
@@ -334,9 +347,17 @@ custom_milo_formatted = """
 """
 
 
+
+
+
+
+# COMMAND ----------
+
+####################################################################
+# ➡️ Show how Emilio entities are resolved
+####################################################################
+
 displayHTML(custom_milo_formatted)
-
-
 
 # COMMAND ----------
 
@@ -463,7 +484,6 @@ html = html.replace("""<tr>
       <td style='text-align:left'>1997-10-14</td>
     </tr>""")
 
-print(html)
 
 custom_html_118 = """
 <table border="1" class="dataframe">
@@ -586,5 +606,13 @@ custom_html_118 = """
 </table>
 """
 
+
+
+
+# COMMAND ----------
+
+####################################################################
+# ➡️ Show how Teodoro entities are resolved
+####################################################################
 
 displayHTML(custom_html_118)
