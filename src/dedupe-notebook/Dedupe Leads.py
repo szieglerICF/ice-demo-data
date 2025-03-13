@@ -18,7 +18,8 @@ pip install unidecode
 # MAGIC */
 # MAGIC
 # MAGIC
-# MAGIC SELECT * FROM `hive_metastore`.`default`.`ice_data_2025_02_28_135500_2_csv`;
+# MAGIC SELECT record_date, lead_source, lead_id, first_name, last_name, alias, date_of_birth, country_of_origin, anumber, fingerprint_hash,  last_known_address, phone_number, sex, height_inches, weight, risk_level, organized_crime_links, distinguishing_marks,  legal_proceedings, past_deportations, known_associates,  case_officer_assigned, deportation_orders 
+# MAGIC FROM `hive_metastore`.`default`.`ice_data_2025_02_28_135500_2_csv`;
 # MAGIC
 # MAGIC
 
@@ -109,6 +110,10 @@ sample = df[df["lead_id"].isin(["0ffa8be931c44600", "0ffa8be931c44601", "0ffa8be
 display(sample)
 
 # COMMAND ----------
+
+####################################################################
+# ➡️ Show dedupe settings and training 
+####################################################################
 
 output_file = "dedupe_output.csv"
 settings_file = "dedupe_config_settings"
@@ -289,7 +294,7 @@ custom_milo_formatted = """
     <tr>
       <th>4</th>
       <td style="text-align:left">🆔 fingerprint_hash</td>
-      <td style="text-align:left">94k2j82730</td>
+      <td style="text-align:left"><b style="color:red;">None</b></td>
       <td style="text-align:left">94k2j82730</td>
       <td style="text-align:left">94k2j82730</td>
     </tr>
@@ -533,15 +538,15 @@ custom_html_118 = """
     <tr>
       <th>4</th>
       <td style='text-align:left'>🔢 anumber</td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
       <td style='text-align:left'>a465482608</td>
-      <td style='text-align:left'><b style="color:red;">None</b></td>
-      <td style='text-align:left'><b style="color:red;">None</b></td>
       <td style='text-align:left'>a465482608</td>
     </tr>
     <tr>
       <th>5</th>
       <td style='text-align:left'>🆔 fingerprint_hash</td>
-      <td style='text-align:left'>9d5d1dea40</td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
       <td style='text-align:left'>9d5d1dea40</td>
       <td style='text-align:left'>9d5d1dea40</td>
       <td style='text-align:left'>9d5d1dea40</td>
@@ -581,7 +586,7 @@ custom_html_118 = """
     <tr>
       <th>10</th>
       <td style='text-align:left'>🎂 date_of_birth</td>
-      <td style='text-align:left'>1997-10-14</td>
+      <td style='text-align:left'><b style="color:red;">None</b></td>
       <td style='text-align:left'>1997-10-14</td>
       <td style='text-align:left'><span style="color: red; font-weight:bold;">None</span></td>
       <td style='text-align:left'>1997-10-14</td>
