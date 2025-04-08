@@ -621,3 +621,51 @@ custom_html_118 = """
 ####################################################################
 
 displayHTML(custom_html_118)
+
+# COMMAND ----------
+
+import pandas as pd
+from collections import Counter
+
+def create_golden_record(df):
+    golden_record = {}
+    
+    # Iterate through each column
+    for column in df.columns:
+        values = df[column].dropna().tolist()
+        
+        if not values:
+            golden_record[column] = None
+            continue
+        
+        # If it's a date field, take the most recent value
+        if "date" in column or "record_date" in column:
+            golden_record[column] = max(values)
+        
+        # If it's a numeric ID field, prefer the most frequent
+        elif "id" in column or "score" in column or "number" in column:
+            most_common_value = Counter(values).most_common(1)[0][0]
+            golden_record[column] = most_common_value
+        
+        # If it's the last known address field, always take the last record
+        elif "last_known_address" in column:
+            golden_record[column] = values[-1]
+        
+        # If it's a general categorical/text field, prefer the most frequent
+        else:
+            most_common_value = Counter(values).most_common(1)[0][0]
+            golden_record[column] = most_common_value
+    
+    return pd.DataFrame([golden_record])
+
+# Example usage with a DataFrame (replace df with actual data)
+# df = pd.read_csv("your_data.csv")  # Load data
+golden_df = create_golden_record(df_118)
+
+
+
+
+
+# COMMAND ----------
+
+display(golden_df)
