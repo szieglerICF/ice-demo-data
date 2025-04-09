@@ -624,6 +624,11 @@ displayHTML(custom_html_118)
 
 # COMMAND ----------
 
+####################################################################
+# ➡️ Show simple Golden Record algorithm
+####################################################################
+
+
 import pandas as pd
 from collections import Counter
 
